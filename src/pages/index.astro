@@ -1,48 +1,76 @@
 ---
+import { getCollection } from 'astro:content';
 import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
+import FormattedDate from '../components/FormattedDate.astro';
 import Header from '../components/Header.astro';
 import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
+
+const latest = (await getCollection('articles'))
+	.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+	.slice(0, 3);
 ---
 
 <!doctype html>
 <html lang="en">
 	<head>
 		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+		<style>
+			.hero {
+				padding: 2em 0 3em 0;
+			}
+			.hero p {
+				font-size: 1.25em;
+				color: rgb(var(--gray-dark));
+			}
+			.latest h3 {
+				margin-bottom: 0.25em;
+			}
+			.latest-item {
+				padding: 1.5em 0;
+				border-top: 1px solid rgb(var(--gray-light));
+			}
+			.latest-item:first-of-type {
+				border-top: none;
+			}
+			.latest-item .eyebrow {
+				display: block;
+				margin-bottom: 0.4em;
+			}
+		</style>
 	</head>
 	<body>
 		<Header />
 		<main>
-			<h1>🧑‍🚀 Hello, Astronaut!</h1>
-			<p>
-				Welcome to the official <a href="https://astro.build/">Astro</a> blog starter template. This template
-				serves as a lightweight, minimally-styled starting point for anyone looking to build a personal
-				website, blog, or portfolio with Astro.
-			</p>
-			<p>
-				This template comes with a few integrations already configured in your
-				<code>astro.config.mjs</code> file. You can customize your setup with
-				<a href="https://astro.build/integrations">Astro Integrations</a> to add tools like Tailwind,
-				React, or Vue to your project.
-			</p>
-			<p>Here are a few ideas on how to get started with the template:</p>
-			<ul>
-				<li>Edit this page in <code>src/pages/index.astro</code></li>
-				<li>Edit the site header items in <code>src/components/Header.astro</code></li>
-				<li>Add your name to the footer in <code>src/components/Footer.astro</code></li>
-				<li>Check out the included articles in <code>src/content/articles/</code></li>
-				<li>Customize the article page layout in <code>src/layouts/ArticleLayout.astro</code></li>
-			</ul>
-			<p>
-				Have fun! If you get stuck, remember to
-				<a href="https://docs.astro.build/">read the docs</a>
-				or <a href="https://astro.build/chat">join us on Discord</a> to ask questions.
-			</p>
-			<p>
-				Looking for a blog template with a bit more personality? Check out
-				<a href="https://github.com/Charca/astro-blog-template">astro-blog-template</a>
-				by <a href="https://twitter.com/Charca">Maxi Ferreira</a>.
-			</p>
+			<section class="hero">
+				<h1>{SITE_TITLE}</h1>
+				<p>{SITE_DESCRIPTION}</p>
+				<p>
+					One issue a week: build logs, teardowns of how things actually work, competition
+					coverage, and ideas borrowed from biology. Browse everything in
+					<a href="/articles">Articles</a>.
+				</p>
+			</section>
+			<section class="latest">
+				<h2>Latest issues</h2>
+				{
+					latest.length === 0 ? (
+						<p>Nothing published yet — check back soon.</p>
+					) : (
+						latest.map((article) => (
+							<div class="latest-item">
+								<span class="eyebrow">
+									{article.data.category} · <FormattedDate date={article.data.date} />
+								</span>
+								<h3>
+									<a href={`/articles/${article.id}/`}>{article.data.title}</a>
+								</h3>
+								<p>{article.data.description}</p>
+							</div>
+						))
+					)
+				}
+			</section>
 		</main>
 		<Footer />
 	</body>
